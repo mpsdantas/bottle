@@ -1,2 +1,2 @@
 # Bottle
-⚙️ Bottle is a fasthttp-based framework for developing microservices in go
+⚙️ Bottle is a framework for developing microservices in go
