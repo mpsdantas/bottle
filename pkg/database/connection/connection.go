@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx"
 	"github.com/mpsdantas/bottle/pkg/log"
 )
 
@@ -42,7 +42,7 @@ func New(ctx context.Context, config *Config) *sql.DB {
 		sslmode,
 	)
 
-	db, err := sql.Open("postgres", conn)
+	db, err := sql.Open("pgx", conn)
 	if err != nil {
 		log.Fatal(ctx, "could not open postgres connection", log.Err(err))
 	}
