@@ -22,7 +22,8 @@ func New(ctx context.Context, opt ...OptionFunc) *gorm.DB {
 	}
 
 	db, err := gorm.Open(postgres.New(postgres.Config{
-		Conn: opts.conn,
+		PreferSimpleProtocol: opts.preferSimpleProtocol,
+		Conn:                 opts.conn,
 	}), &gorm.Config{})
 	if err != nil {
 		log.Fatal(ctx, "could not start gorm db",
