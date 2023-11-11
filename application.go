@@ -40,7 +40,10 @@ func (a *Application) Run() {
 		log.String("scope", env.Scope),
 	)
 
-	a.App.Hooks().OnListen(OnListen(ctx))
+	a.App.Hooks().OnListen(func(data fiber.ListenData) error {
+		OnListen(ctx)
+		return nil
+	})
 	a.App.Hooks().OnShutdown(OnShutdown(ctx))
 
 	errChan := make(chan error)
