@@ -9,14 +9,10 @@ import (
 )
 
 var (
-	logger *zap.Logger
+	logger zap.Logger
 )
 
-func init() {
-	Load()
-}
-
-func Load() {
+func loadLog() {
 	var config zap.Config
 	fields := zap.Fields(
 		zap.Field{
@@ -54,7 +50,9 @@ func Load() {
 		config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	}
 
-	logger, _ = config.Build(zap.AddCallerSkip(1), fields)
+	l, _ := config.Build(zap.AddCallerSkip(1), fields)
+	zap.ReplaceGlobals(l)
+	logger = *l
 }
 
 func Debug(ctx context.Context, msg string, fields ...zap.Field) {
