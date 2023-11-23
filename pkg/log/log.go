@@ -13,6 +13,10 @@ var (
 )
 
 func init() {
+	Load()
+}
+
+func Load() {
 	var config zap.Config
 	fields := zap.Fields(
 		zap.Field{
