@@ -12,7 +12,7 @@ var (
 	logger zap.Logger
 )
 
-func loadLog() {
+func init() {
 	var config zap.Config
 	fields := zap.Fields(
 		zap.Field{
