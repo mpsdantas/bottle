@@ -8,10 +8,6 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var (
-	logger zap.Logger
-)
-
 func init() {
 	var config zap.Config
 	fields := zap.Fields(
@@ -52,39 +48,38 @@ func init() {
 
 	l, _ := config.Build(zap.AddCallerSkip(1), fields)
 	zap.ReplaceGlobals(l)
-	logger = *l
 }
 
 func Debug(ctx context.Context, msg string, fields ...zap.Field) {
-	logger.Debug(msg, MergeDefaultFields(ctx, fields...)...)
+	zap.L().Debug(msg, MergeDefaultFields(ctx, fields...)...)
 }
 
 func Info(ctx context.Context, msg string, fields ...zap.Field) {
-	logger.Info(msg, MergeDefaultFields(ctx, fields...)...)
+	zap.L().Info(msg, MergeDefaultFields(ctx, fields...)...)
 }
 
 func Warn(ctx context.Context, msg string, fields ...zap.Field) {
-	logger.Warn(msg, MergeDefaultFields(ctx, fields...)...)
+	zap.L().Warn(msg, MergeDefaultFields(ctx, fields...)...)
 }
 
 func Error(ctx context.Context, msg string, fields ...zap.Field) {
-	logger.Error(msg, MergeDefaultFields(ctx, fields...)...)
+	zap.L().Error(msg, MergeDefaultFields(ctx, fields...)...)
 }
 
 func DPanic(ctx context.Context, msg string, fields ...zap.Field) {
-	logger.DPanic(msg, MergeDefaultFields(ctx, fields...)...)
+	zap.L().DPanic(msg, MergeDefaultFields(ctx, fields...)...)
 }
 
 func Panic(ctx context.Context, msg string, fields ...zap.Field) {
-	logger.Panic(msg, MergeDefaultFields(ctx, fields...)...)
+	zap.L().Panic(msg, MergeDefaultFields(ctx, fields...)...)
 }
 
 func Fatal(ctx context.Context, msg string, fields ...zap.Field) {
-	logger.Fatal(msg, MergeDefaultFields(ctx, fields...)...)
+	zap.L().Fatal(msg, MergeDefaultFields(ctx, fields...)...)
 }
 
 func Sync() error {
-	return logger.Sync()
+	return zap.L().Sync()
 }
 
 func MergeDefaultFields(ctx context.Context, fields ...zap.Field) []zap.Field {
