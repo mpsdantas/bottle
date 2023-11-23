@@ -19,7 +19,6 @@ type Application struct {
 }
 
 func New() *Application {
-	log.Load()
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
 		ErrorHandler:          ErrorHandler,
