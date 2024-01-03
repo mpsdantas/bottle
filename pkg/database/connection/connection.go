@@ -10,12 +10,13 @@ import (
 )
 
 type Config struct {
-	User     string
-	Password string
-	Database string
-	Host     string
-	Port     string
-	SSLMode  string
+	User           string
+	Password       string
+	Database       string
+	Host           string
+	Port           string
+	SSLMode        string
+	ConnectionName string
 }
 
 func New(ctx context.Context, config *Config) *sql.DB {
