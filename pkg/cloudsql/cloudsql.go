@@ -13,7 +13,7 @@ import (
 	"github.com/mpsdantas/bottle/pkg/log"
 )
 
-func DB(ctx context.Context, cfg connection.Config) *sql.DB {
+func DB(ctx context.Context, cfg *connection.Config) *sql.DB {
 	dsn := fmt.Sprintf("user=%s password=%s database=%s", cfg.User, cfg.Password, cfg.Database)
 	config, err := pgx.ParseConfig(dsn)
 	if err != nil {
