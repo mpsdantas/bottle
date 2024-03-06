@@ -11,7 +11,7 @@ func init() {
 
 	Environment = Get("APPLICATION_ENV", Local)
 	Scope = Get("APPLICATION_SCOPE", Server)
-	Port = Get("APPLICATION_PORT", "8080")
+	Port = Get("PORT", "8080")
 	Version = Get("APPLICATION_VERSION", "develop")
 	Application = Bottle["application"]
 }
