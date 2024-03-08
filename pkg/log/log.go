@@ -9,7 +9,14 @@ import (
 )
 
 func init() {
-	var config zap.Config
+	config := &zap.Config{
+		Level:            zap.NewAtomicLevelAt(zapcore.InfoLevel),
+		Encoding:         "json",
+		EncoderConfig:    encoderConfig,
+		OutputPaths:      []string{"stdout"},
+		ErrorOutputPaths: []string{"stderr"},
+	}
+
 	fields := zap.Fields(
 		zap.Field{
 			Key:    "application",
@@ -39,15 +46,49 @@ func init() {
 	)
 
 	if env.Environment == env.Prod || env.Environment == env.Stage {
-		config = zap.NewProductionConfig()
 		config.EncoderConfig.StacktraceKey = "error.stack"
 	} else {
-		config = zap.NewDevelopmentConfig()
 		config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	}
 
-	l, _ := config.Build(zap.AddCallerSkip(1), fields)
+	l, _ := config.Build(zap.AddCallerSkip(1), zap.AddStacktrace(zap.DPanicLevel), fields)
+
 	zap.ReplaceGlobals(l)
+}
+
+var encoderConfig = zapcore.EncoderConfig{
+	TimeKey:        "time",
+	LevelKey:       "severity",
+	NameKey:        "logger",
+	CallerKey:      "caller",
+	MessageKey:     "message",
+	StacktraceKey:  "stacktrace",
+	LineEnding:     zapcore.DefaultLineEnding,
+	EncodeLevel:    encodeLevel(),
+	EncodeTime:     zapcore.RFC3339TimeEncoder,
+	EncodeDuration: zapcore.MillisDurationEncoder,
+	EncodeCaller:   zapcore.ShortCallerEncoder,
+}
+
+func encodeLevel() zapcore.LevelEncoder {
+	return func(l zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
+		switch l {
+		case zapcore.DebugLevel:
+			enc.AppendString("DEBUG")
+		case zapcore.InfoLevel:
+			enc.AppendString("INFO")
+		case zapcore.WarnLevel:
+			enc.AppendString("WARNING")
+		case zapcore.ErrorLevel:
+			enc.AppendString("ERROR")
+		case zapcore.DPanicLevel:
+			enc.AppendString("CRITICAL")
+		case zapcore.PanicLevel:
+			enc.AppendString("ALERT")
+		case zapcore.FatalLevel:
+			enc.AppendString("EMERGENCY")
+		}
+	}
 }
 
 func Debug(ctx context.Context, msg string, fields ...zap.Field) {
