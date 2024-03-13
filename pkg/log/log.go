@@ -9,13 +9,7 @@ import (
 )
 
 func init() {
-	config := &zap.Config{
-		Level:            zap.NewAtomicLevelAt(zapcore.InfoLevel),
-		Encoding:         "json",
-		EncoderConfig:    encoderConfig,
-		OutputPaths:      []string{"stdout"},
-		ErrorOutputPaths: []string{"stderr"},
-	}
+	var config zap.Config
 
 	fields := zap.Fields(
 		zap.Field{
@@ -46,6 +40,14 @@ func init() {
 	)
 
 	if env.Environment == env.Prod || env.Environment == env.Stage {
+		config = zap.Config{
+			Level:            zap.NewAtomicLevelAt(zapcore.InfoLevel),
+			Encoding:         "json",
+			EncoderConfig:    encoderConfig,
+			OutputPaths:      []string{"stdout"},
+			ErrorOutputPaths: []string{"stderr"},
+		}
+
 		config.EncoderConfig.StacktraceKey = "error.stack"
 	} else {
 		config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
