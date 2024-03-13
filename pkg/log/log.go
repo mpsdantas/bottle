@@ -50,6 +50,7 @@ func init() {
 
 		config.EncoderConfig.StacktraceKey = "error.stack"
 	} else {
+		config = zap.NewDevelopmentConfig()
 		config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	}
 
