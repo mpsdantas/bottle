@@ -34,8 +34,8 @@ func (c *Client) Close() {
 	}
 }
 
-func (c *Client) Topic(id string) *Topic {
-	return &Topic{
+func (c *Client) Topic(id string) Topic {
+	return &topic{
 		tp: c.clt.Topic(id),
 	}
 }

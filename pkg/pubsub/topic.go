@@ -8,11 +8,15 @@ import (
 	"github.com/mpsdantas/bottle/pkg/log"
 )
 
-type Topic struct {
+type Topic interface {
+	Publish(ctx context.Context, event string, value interface{})
+}
+
+type topic struct {
 	tp *pubsub.Topic
 }
 
-func (t *Topic) Publish(ctx context.Context, event string, value interface{}) {
+func (t *topic) Publish(ctx context.Context, event string, value interface{}) {
 	go func(c context.Context) {
 		data, err := json.Marshal(value)
 		if err != nil {
