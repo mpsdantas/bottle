@@ -18,11 +18,21 @@ type Application struct {
 	*fiber.App
 }
 
-func New() *Application {
-	app := fiber.New(fiber.Config{
+type Config struct {
+	UploadLimit int64
+}
+
+func New(configs ...*Config) *Application {
+	cfg := fiber.Config{
 		DisableStartupMessage: true,
 		ErrorHandler:          ErrorHandler,
-	})
+	}
+
+	if len(configs) > 0 {
+		cfg.BodyLimit = int(configs[0].UploadLimit)
+	}
+
+	app := fiber.New(cfg)
 	app.Use(recover.New())
 	app.Use(requestid.New())
 
