@@ -64,3 +64,7 @@ func (c *Client) Download(ctx context.Context, filename string) ([]byte, error) 
 
 	return data, nil
 }
+
+func (c *Client) Close() error {
+	return c.c.Close()
+}
