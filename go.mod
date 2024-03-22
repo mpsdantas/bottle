@@ -5,6 +5,7 @@ go 1.21
 require (
 	cloud.google.com/go/cloudsqlconn v1.8.1
 	cloud.google.com/go/pubsub v1.37.0
+	cloud.google.com/go/storage v1.38.0
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/gofiber/fiber/v2 v2.52.2
 	github.com/golang/mock v1.6.0
