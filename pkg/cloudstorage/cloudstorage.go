@@ -65,6 +65,8 @@ func (c *Client) Download(ctx context.Context, filename string) ([]byte, error) 
 	return data, nil
 }
 
-func (c *Client) Close() error {
-	return c.c.Close()
+func (c *Client) Close() {
+	if err := c.c.Close(); err != nil {
+		log.Error(context.Background(), "could not close storage", log.Err(err))
+	}
 }
