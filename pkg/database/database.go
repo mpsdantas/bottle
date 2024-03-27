@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/mpsdantas/bottle/pkg/env"
 	"github.com/mpsdantas/bottle/pkg/errors"
@@ -30,6 +31,17 @@ func New(ctx context.Context, opt ...OptionFunc) *gorm.DB {
 			log.Err(err),
 		)
 	}
+
+	sqlDb, err := db.DB()
+	if err != nil {
+		log.Fatal(ctx, "could not open db",
+			log.Err(err),
+		)
+	}
+
+	sqlDb.SetMaxIdleConns(2)
+	sqlDb.SetMaxOpenConns(10)
+	sqlDb.SetConnMaxLifetime(time.Hour)
 
 	if len(opts.migrations) > 0 && env.Environment == env.Local {
 		if err := db.AutoMigrate(opts.migrations...); err != nil {
