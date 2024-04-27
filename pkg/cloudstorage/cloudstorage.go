@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
+	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/mpsdantas/bottle/pkg/log"
@@ -63,6 +65,22 @@ func (c *Client) Download(ctx context.Context, filename string) ([]byte, error) 
 	}
 
 	return data, nil
+}
+
+func (c *Client) SignedURL(ctx context.Context, filename string, expires time.Time) (string, error) {
+	url, err := c.c.Bucket(c.bucket).SignedURL(filename, &storage.SignedURLOptions{
+		Method:  http.MethodGet,
+		Expires: expires,
+	})
+	if err != nil {
+		log.Error(ctx, "could not get signed url",
+			log.Err(err),
+		)
+
+		return "", fmt.Errorf("could not get signed url: %w", err)
+	}
+
+	return url, nil
 }
 
 func (c *Client) Close() {
