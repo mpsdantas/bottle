@@ -32,12 +32,15 @@ func (c *rest) Do(ctx context.Context, req *fasthttp.Request) (*Response, error)
 	res := fasthttp.AcquireResponse()
 	err := fasthttp.DoTimeout(req, res, 40*time.Second)
 
+	headers := &fasthttp.ResponseHeader{}
+	res.Header.CopyTo(headers)
+
 	defer fasthttp.ReleaseRequest(req)
 	defer fasthttp.ReleaseResponse(res)
 
 	return &Response{
 		StatusCode: res.StatusCode(),
-		Headers:    &res.Header,
+		Headers:    headers,
 		Body:       res.Body(),
 	}, err
 }
