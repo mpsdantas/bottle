@@ -30,12 +30,15 @@ func New(ctx context.Context, bucket string) *Client {
 	}
 }
 
-func (c *Client) Upload(ctx context.Context, filename string, data io.Reader) error {
-	o := c.c.Bucket(c.bucket).Object(filename)
+func (c *Client) Upload(ctx context.Context, opts *UploadOptions) error {
+	o := c.c.Bucket(c.bucket).Object(opts.Filename)
 
 	wc := o.NewWriter(ctx)
+	if opts.CacheControl != "" {
+		wc.CacheControl = opts.CacheControl
+	}
 
-	if _, err := io.Copy(wc, data); err != nil {
+	if _, err := io.Copy(wc, opts.Data); err != nil {
 		return fmt.Errorf("could not copy file: %w", err)
 	}
 
