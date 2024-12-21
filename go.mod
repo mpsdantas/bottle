@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	cloud.google.com/go/cloudsqlconn v1.8.1
+	cloud.google.com/go/cloudtasks v1.12.6
 	cloud.google.com/go/pubsub v1.37.0
 	cloud.google.com/go/storage v1.38.0
 	github.com/DATA-DOG/go-sqlmock v1.5.2
