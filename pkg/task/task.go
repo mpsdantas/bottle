@@ -37,7 +37,7 @@ func New(ctx context.Context, opts *Options) *Client {
 
 	return &Client{
 		clt:            client,
-		queue:          fmt.Sprintf("projects/%s/locations/%s/queues/%s", opts.ProjectID, opts.ProjectID, opts.ServiceAccount),
+		queue:          fmt.Sprintf("projects/%s/locations/%s/queues/%s", opts.ProjectID, opts.LocationID, opts.Queue),
 		serviceAccount: opts.ServiceAccount,
 	}
 }
