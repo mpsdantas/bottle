@@ -4,24 +4,30 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"time"
 
 	cloudtasks "cloud.google.com/go/cloudtasks/apiv2"
 	"cloud.google.com/go/cloudtasks/apiv2/cloudtaskspb"
 	"github.com/mpsdantas/bottle/pkg/log"
 	"github.com/mpsdantas/bottle/pkg/pubsub"
-	"golang.org/x/oauth2"
-	"google.golang.org/api/idtoken"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type Client struct {
-	clt    *cloudtasks.Client
-	tokens map[string]*oauth2.Token
-	queue  string
+type Options struct {
+	ProjectID      string
+	LocationID     string
+	Queue          string
+	ServiceAccount string
 }
 
-func New(ctx context.Context, projectID string, locationID string, queue string) *Client {
+type Client struct {
+	clt            *cloudtasks.Client
+	queue          string
+	serviceAccount string
+}
+
+func New(ctx context.Context, opts *Options) *Client {
 	client, err := cloudtasks.NewClient(ctx)
 	if err != nil {
 		log.Panic(ctx, "could not start google cloud task",
@@ -30,9 +36,9 @@ func New(ctx context.Context, projectID string, locationID string, queue string)
 	}
 
 	return &Client{
-		clt:    client,
-		tokens: map[string]*oauth2.Token{},
-		queue:  fmt.Sprintf("projects/%s/locations/%s/queues/%s", projectID, locationID, queue),
+		clt:            client,
+		queue:          fmt.Sprintf("projects/%s/locations/%s/queues/%s", opts.ProjectID, opts.ProjectID, opts.ServiceAccount),
+		serviceAccount: opts.ServiceAccount,
 	}
 }
 
@@ -58,11 +64,12 @@ func (c *Client) Schedule(ctx context.Context, url string, data any, schedule ti
 }
 
 func (c *Client) create(ctx context.Context, url string, data any, schedule *time.Time) {
-	token, err := c.getToken(ctx, url)
+	baseUrl, err := getBaseURL(url)
 	if err != nil {
-		log.Error(ctx, "could not get token",
+		log.Error(ctx, "could not get base url",
 			log.Err(err),
 		)
+
 		return
 	}
 
@@ -79,8 +86,11 @@ func (c *Client) create(ctx context.Context, url string, data any, schedule *tim
 			HttpRequest: &cloudtaskspb.HttpRequest{
 				HttpMethod: cloudtaskspb.HttpMethod_POST,
 				Url:        url,
-				Headers: map[string]string{
-					"Authorization": fmt.Sprintf("Bearer %s", token.AccessToken),
+				AuthorizationHeader: &cloudtaskspb.HttpRequest_OidcToken{
+					OidcToken: &cloudtaskspb.OidcToken{
+						ServiceAccountEmail: c.serviceAccount,
+						Audience:            baseUrl,
+					},
 				},
 				Body: payload,
 			},
@@ -103,25 +113,14 @@ func (c *Client) create(ctx context.Context, url string, data any, schedule *tim
 	}
 }
 
-func (c *Client) getToken(ctx context.Context, audience string) (*oauth2.Token, error) {
-	value, ok := c.tokens[audience]
-	if ok {
-		if value.Valid() {
-			return value, nil
-		}
-	}
-
-	tokenSource, err := idtoken.NewTokenSource(ctx, audience)
+func getBaseURL(rawURL string) (string, error) {
+	// Parse a URL string into a *url.URL structure
+	parsedURL, err := url.Parse(rawURL)
 	if err != nil {
-		return nil, fmt.Errorf("could not create token source: %w", err)
+		return "", err
 	}
 
-	token, err := tokenSource.Token()
-	if err != nil {
-		return nil, fmt.Errorf("could not get token: %w", err)
-	}
-
-	c.tokens[audience] = token
-
-	return token, nil
+	// Reconstruct the base URL
+	baseURL := fmt.Sprintf("%s://%s", parsedURL.Scheme, parsedURL.Host)
+	return baseURL, nil
 }
