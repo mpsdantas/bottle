@@ -18,10 +18,6 @@ type Application struct {
 	*fiber.App
 }
 
-type Config struct {
-	UploadLimit int64
-}
-
 func New(opts ...Option) *Application {
 	cfg := fiber.Config{
 		DisableStartupMessage: true,
