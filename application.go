@@ -22,16 +22,20 @@ type Config struct {
 	UploadLimit int64
 }
 
-func New(configs ...*Config) *Application {
+func New(opts ...Option) *Application {
 	cfg := fiber.Config{
 		DisableStartupMessage: true,
 		ErrorHandler:          ErrorHandler,
 	}
-
-	if len(configs) > 0 {
-		cfg.BodyLimit = int(configs[0].UploadLimit)
+	defaults := &options{
+		uploadLimit: fiber.DefaultBodyLimit,
 	}
 
+	for _, opt := range opts {
+		opt(defaults)
+	}
+
+	cfg.BodyLimit = int(defaults.uploadLimit)
 	app := fiber.New(cfg)
 	app.Use(recover.New())
 	app.Use(requestid.New())
@@ -50,11 +54,8 @@ func (a *Application) Run() {
 		log.String("scope", env.Scope),
 	)
 
-	a.App.Hooks().OnListen(func(data fiber.ListenData) error {
-		OnListen(ctx)
-		return nil
-	})
-	a.App.Hooks().OnShutdown(OnShutdown(ctx))
+	a.App.Hooks().OnListen(onListen(ctx))
+	a.App.Hooks().OnShutdown(onShutdown(ctx))
 
 	errChan := make(chan error)
 	stopChan := make(chan os.Signal, 1)
@@ -94,5 +95,21 @@ func (a *Application) stop(ctx context.Context) {
 		log.Fatal(ctx, "could not shutdown server",
 			log.Err(err),
 		)
+	}
+}
+
+func onListen(ctx context.Context) func(data fiber.ListenData) error {
+	return func(data fiber.ListenData) error {
+		log.Info(ctx, "server is running")
+		return nil
+	}
+}
+
+func onShutdown(ctx context.Context) func() error {
+	return func() error {
+		_ = log.Sync()
+		log.Info(ctx, "server was stopped")
+
+		return nil
 	}
 }
