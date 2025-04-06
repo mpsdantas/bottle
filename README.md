@@ -1,2 +1,2 @@
 # Bottle
-⚙️ Bottle is a framework for developing microservices in go
+⚙️ Bottle is a modular toolkit that accelerates the development of scalable and maintainable APIs in Go.
