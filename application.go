@@ -10,12 +10,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
-	"github.com/mpsdantas/bottle/pkg/env"
-	"github.com/mpsdantas/bottle/pkg/log"
+	"github.com/mpsdantas/bottle/pkg/v2/core/application"
+	"github.com/mpsdantas/bottle/pkg/v2/core/log"
 )
 
 type Application struct {
-	*fiber.App
+	server *fiber.App
 }
 
 func New(opts ...Option) *Application {
@@ -35,6 +35,7 @@ func New(opts ...Option) *Application {
 	app := fiber.New(cfg)
 	app.Use(recover.New())
 	app.Use(requestid.New())
+	log.Init()
 
 	return &Application{
 		app,
@@ -44,14 +45,10 @@ func New(opts ...Option) *Application {
 func (a *Application) Run() {
 	ctx := context.Background()
 
-	log.Info(ctx, "starting server",
-		log.String("name", env.Application),
-		log.String("environment", env.Environment),
-		log.String("scope", env.Scope),
-	)
+	log.Info(ctx, "starting server")
 
-	a.App.Hooks().OnListen(onListen(ctx))
-	a.App.Hooks().OnShutdown(onShutdown(ctx))
+	a.server.Hooks().OnListen(onListen(ctx))
+	a.server.Hooks().OnShutdown(onShutdown(ctx))
 
 	errChan := make(chan error)
 	stopChan := make(chan os.Signal, 1)
@@ -75,9 +72,17 @@ func (a *Application) Run() {
 	}
 }
 
+func (a *Application) Shutdown() error {
+	return a.server.Shutdown()
+}
+
+func (a *Application) Router() *Router {
+	return newRouter(a.server)
+}
+
 func (a *Application) start() error {
-	addr := fmt.Sprintf(":%v", env.Port)
-	if err := a.Listen(addr); err != nil {
+	addr := fmt.Sprintf(":%v", application.Port)
+	if err := a.server.Listen(addr); err != nil {
 		return err
 	}
 
@@ -87,7 +92,7 @@ func (a *Application) start() error {
 func (a *Application) stop(ctx context.Context) {
 	log.Info(ctx, "stopping server")
 
-	if err := a.Shutdown(); err != nil {
+	if err := a.server.ShutdownWithContext(ctx); err != nil {
 		log.Fatal(ctx, "could not shutdown server",
 			log.Err(err),
 		)
