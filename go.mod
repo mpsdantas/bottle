@@ -1,6 +1,6 @@
 module github.com/mpsdantas/bottle
 
-go 1.24
+go 1.24.0
 
 require (
 	cloud.google.com/go/cloudsqlconn v1.16.0
