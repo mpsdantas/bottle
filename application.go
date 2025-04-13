@@ -10,8 +10,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
-	"github.com/mpsdantas/bottle/pkg/v2/core/application"
-	"github.com/mpsdantas/bottle/pkg/v2/core/log"
+	"github.com/mpsdantas/bottle/pkg/core/application"
+	"github.com/mpsdantas/bottle/pkg/core/log"
 )
 
 type Application struct {

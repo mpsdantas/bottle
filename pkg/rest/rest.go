@@ -2,51 +2,55 @@ package rest
 
 import (
 	"context"
-	"time"
-
-	"github.com/valyala/fasthttp"
+	"io"
+	"net/http"
 )
 
-//go:generate mockgen -source=./rest.go -package=rest -destination=./rest_mock.go
-type Client interface {
-	Do(ctx context.Context, req *fasthttp.Request) (*Response, error)
+type HTTPClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
+type Rest struct {
+	client HTTPClient
+}
+
+func New(client HTTPClient) *Rest {
+	return &Rest{
+		client: client,
+	}
 }
 
 type Response struct {
 	StatusCode int
-	Headers    *fasthttp.ResponseHeader
+	Headers    http.Header
 	Body       []byte
 }
 
-type rest struct {
-	application string
-}
+func (r *Rest) Do(ctx context.Context, req *http.Request) (*Response, error) {
+	req = req.WithContext(ctx)
 
-func (c *rest) Do(ctx context.Context, req *fasthttp.Request) (*Response, error) {
-	req.Header.Add("x-application", c.application)
-	requestid, ok := ctx.Value("requestid").(string)
-	if requestid != "" && ok {
-		req.Header.Add("x-request-id", requestid)
+	if appName, ok := ctx.Value("application").(string); ok && appName != "" {
+		req.Header.Set("x-application", appName)
 	}
 
-	res := fasthttp.AcquireResponse()
-	err := fasthttp.DoTimeout(req, res, 40*time.Second)
+	if requestID, ok := ctx.Value("requestid").(string); ok && requestID != "" {
+		req.Header.Set("x-request-id", requestID)
+	}
 
-	headers := &fasthttp.ResponseHeader{}
-	res.Header.CopyTo(headers)
+	res, err := r.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
 
-	defer fasthttp.ReleaseRequest(req)
-	defer fasthttp.ReleaseResponse(res)
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
 
 	return &Response{
-		StatusCode: res.StatusCode(),
-		Headers:    headers,
-		Body:       res.Body(),
-	}, err
-}
-
-func New(name string) Client {
-	return &rest{
-		application: name,
-	}
+		StatusCode: res.StatusCode,
+		Headers:    res.Header,
+		Body:       body,
+	}, nil
 }

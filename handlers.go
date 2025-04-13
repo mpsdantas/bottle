@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/mpsdantas/bottle/pkg/log"
+	"github.com/mpsdantas/bottle/pkg/core/log"
 )
 
 func ErrorHandler(ctx *fiber.Ctx, err error) error {
