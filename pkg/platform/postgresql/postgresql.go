@@ -125,6 +125,11 @@ func (w *Postgresql) Transaction(ctx context.Context, fn func(*Postgresql) error
 	})
 }
 
+func (w *Postgresql) Where(query interface{}, args ...interface{}) *Postgresql {
+	tx := w.db.Where(query, args...)
+	return &Postgresql{db: tx}
+}
+
 func (w *Postgresql) Model(ctx context.Context, value any) *Postgresql {
 	tx := w.withContext(ctx).Model(value)
 	return &Postgresql{db: tx}
