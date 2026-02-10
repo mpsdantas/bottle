@@ -7,7 +7,28 @@ import (
 	"github.com/mpsdantas/bottle/pkg/core/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
+
+type Expression interface {
+	Build(builder Builder)
+}
+
+type Builder interface {
+	Writer
+	WriteQuoted(field interface{})
+	AddVar(Writer, ...interface{})
+	AddError(error) error
+}
+
+type Writer interface {
+	WriteByte(byte) error
+	WriteString(string) (int, error)
+}
+
+type Returning struct {
+	clause.Returning
+}
 
 type Postgresql struct {
 	db *gorm.DB
@@ -106,6 +127,11 @@ func (w *Postgresql) Transaction(ctx context.Context, fn func(*Postgresql) error
 
 func (w *Postgresql) Model(ctx context.Context, value any) *Postgresql {
 	tx := w.withContext(ctx).Model(value)
+	return &Postgresql{db: tx}
+}
+
+func (w *Postgresql) Clauses(ctx context.Context, conds ...clause.Expression) *Postgresql {
+	tx := w.withContext(ctx).Clauses(conds...)
 	return &Postgresql{db: tx}
 }
 
