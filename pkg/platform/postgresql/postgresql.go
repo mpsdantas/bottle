@@ -109,6 +109,11 @@ func (w *Postgresql) Update(ctx context.Context, column string, value any) *Resu
 	return &Result{err: tx.Error, rowsAffected: tx.RowsAffected}
 }
 
+func (w *Postgresql) Updates(values interface{}) *Postgresql {
+	tx := w.db.Updates(values)
+	return &Postgresql{db: tx}
+}
+
 func (w *Postgresql) Delete(ctx context.Context, value any, conds ...any) *Result {
 	tx := w.withContext(ctx).Delete(value, conds...)
 	return &Result{err: tx.Error, rowsAffected: tx.RowsAffected}
