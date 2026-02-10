@@ -145,6 +145,10 @@ func (w *Postgresql) Clauses(ctx context.Context, conds ...clause.Expression) *P
 	return &Postgresql{db: tx}
 }
 
+func (w *Postgresql) Error() error {
+	return w.db.Error
+}
+
 func (w *Postgresql) Migrate(dst ...interface{}) error {
 	return w.db.AutoMigrate(dst...)
 }
