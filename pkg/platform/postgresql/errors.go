@@ -5,5 +5,5 @@ import (
 )
 
 var (
-	NotFound = gorm.ErrRecordNotFound
+	ErrNotFound = gorm.ErrRecordNotFound
 )

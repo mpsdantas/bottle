@@ -104,6 +104,11 @@ func (w *Postgresql) Transaction(ctx context.Context, fn func(*Postgresql) error
 	})
 }
 
+func (w *Postgresql) Model(ctx context.Context, value any) *Postgresql {
+	tx := w.withContext(ctx).Model(value)
+	return &Postgresql{db: tx}
+}
+
 func (w *Postgresql) Migrate(dst ...interface{}) error {
 	return w.db.AutoMigrate(dst...)
 }
