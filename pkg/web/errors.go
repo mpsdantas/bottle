@@ -29,3 +29,7 @@ func Unauthorized(msg string) error {
 func Forbidden(msg string) error {
 	return fiber.NewError(fiber.StatusForbidden, msg)
 }
+
+func Error(code int, text string) error {
+	return fiber.NewError(code, text)
+}
